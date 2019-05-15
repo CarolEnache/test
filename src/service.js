@@ -1,11 +1,20 @@
-export default function getChatLog() {
-  return Promise.resolve([{
-    messageId: '12356',
-    userId: '613651251',
-    fullName: 'Robin Balmforth',
-    timestamp: new Date().toISOString(),
-    email: 'robin@example.com',
-    message: 'Hello, World!',
-    avatar: null
-  }]);
+import { getMembers, getMessages } from './data';
+
+export const getChatLog = () => {
+  return Promise.all([getMembers(), getMessages()])
+    .then(([members, messages]) => {
+      return members.map(member => {
+        const messageById = messages.filter(message => message.userId === member.id)[0]
+        return {
+          messageId: messageById && messageById.id || null,
+          userId: member.id,
+          fullName: `${member.firstName} ${member.lastName}`,
+          timestamp: messageById && new Date(messageById.timestamp).toISOString() || null,
+          email: member.email,
+          message: messageById && messageById.message || null,
+          avatar: member.avatar
+        }
+      })
+    })
 };
+getChatLog()
